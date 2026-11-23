@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "target.schema.json",
+  "title": "设备目标数据契约（前端一期本地数据源）",
+  "description": "对应技术选型文档 §3.11 的 RawDevice / RawDeviceInput。后台字段以用户现有系统为准，此 schema 为候选版，字段锁定时只需同步映射层。",
+  "oneOf": [
+    { "$ref": "#/$defs/listForm" },
+    { "$ref": "#/$defs/treeForm" }
+  ],
+  "$defs": {
+    "device": {
+      "type": "object",
+      "required": ["id", "name", "country", "type"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "country": { "type": "string", "description": "国别码，如 CN/US/RU/INTL；驱动国别→阵营→军标配色映射" },
+        "type": { "type": "string", "description": "后台原始类型，由 MappingConfig.typeMap 归一为 DeviceCategory" },
+        "longitude": { "type": ["number", "null"] },
+        "latitude": { "type": ["number", "null"] },
+        "height": { "type": ["number", "null"] },
+        "tle1": { "type": ["string", "null"], "description": "TLE 第一行，69 字符含校验和" },
+        "tle2": { "type": ["string", "null"], "description": "TLE 第二行，69 字符含校验和" },
+        "epoch": { "type": ["string", "null"], "format": "date-time" },
+        "status": { "type": "string", "enum": ["normal", "alert", "offline", "unknown"] },
+        "stylePreset": { "type": "string" },
+        "features": {
+          "type": "object",
+          "description": "其余「等」字段的参数袋，任意扩展",
+          "additionalProperties": { "type": ["string", "number", "boolean"] }
+        },
+        "children": {
+          "type": "array",
+          "description": "树形子节点；有 children 且无位置为分组节点",
+          "items": { "$ref": "#/$defs/device" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "listForm": {
+      "type": "object",
+      "required": ["format", "devices"],
+      "properties": {
+        "$schema": { "type": "string" },
+        "format": { "const": "list" },
+        "devices": { "type": "array", "items": { "$ref": "#/$defs/device" } }
+      }
+    },
+    "treeForm": {
+      "type": "object",
+      "required": ["format", "roots"],
+      "properties": {
+        "$schema": { "type": "string" },
+        "format": { "const": "tree" },
+        "roots": { "type": "array", "items": { "$ref": "#/$defs/device" } }
+      }
+    }
+  }
+}

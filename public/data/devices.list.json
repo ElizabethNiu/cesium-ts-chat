@@ -1,0 +1,245 @@
+{
+  "$schema": "./target.schema.json",
+  "format": "list",
+  "devices": [
+    {
+      "id": "SAT-ISS",
+      "name": "国际空间站",
+      "country": "INTL",
+      "type": "satellite",
+      "longitude": null,
+      "latitude": null,
+      "height": null,
+      "tle1": "1 25544U 98067A   24001.50000000  .00016717  00000+0  10270-3 0  9996",
+      "tle2": "2 25544  51.6412 247.4627 0006703 130.5360 325.0288 15.72125391356353",
+      "epoch": "2024-01-01T12:00:00Z",
+      "status": "normal",
+      "stylePreset": "sat-lean",
+      "features": {
+        "noradId": "25544"
+      }
+    },
+    {
+      "id": "SAT-BEIDOU3",
+      "name": "北斗三号 M12",
+      "country": "CN",
+      "type": "satellite",
+      "longitude": null,
+      "latitude": null,
+      "height": null,
+      "tle1": "1 44204U 18067A   24001.20000000 -.00000110  00000+0  00000+0 0  9996",
+      "tle2": "2 44204  55.0921 123.8842 0002345  88.4102 271.6678  2.00563120 21507",
+      "epoch": "2024-01-01T12:00:00Z",
+      "status": "normal",
+      "stylePreset": "sat-lean",
+      "features": {
+        "noradId": "44204"
+      }
+    },
+    {
+      "id": "SAT-GPS",
+      "name": "GPS BIIF-10",
+      "country": "US",
+      "type": "satellite",
+      "longitude": null,
+      "latitude": null,
+      "height": null,
+      "tle1": "1 41019U 16007A   24001.30000000  .00000087  00000+0  00000+0 0  9992",
+      "tle2": "2 41019  54.9873  45.1290 0056712 142.6678 217.3341  2.00561200 14001",
+      "epoch": "2024-01-01T12:00:00Z",
+      "status": "normal",
+      "stylePreset": "sat-lean",
+      "features": {
+        "noradId": "41019"
+      }
+    },
+    {
+      "id": "SAT-GLONASS",
+      "name": "格洛纳斯-K2",
+      "country": "RU",
+      "type": "satellite",
+      "longitude": null,
+      "latitude": null,
+      "height": null,
+      "tle1": "1 42939U 17067A   24001.10000000  .00000045  00000+0  00000+0 0  9993",
+      "tle2": "2 42939  64.8120 310.5521 0011234  55.2201 305.1109  2.00570000 19006",
+      "epoch": "2024-01-01T12:00:00Z",
+      "status": "alert",
+      "stylePreset": "sat-alert",
+      "features": {
+        "noradId": "42939"
+      }
+    },
+    {
+      "id": "SAT-YAOGAN",
+      "name": "遥感三十号",
+      "country": "CN",
+      "type": "satellite",
+      "longitude": null,
+      "latitude": null,
+      "height": null,
+      "tle1": "1 41881U 16067B   24001.40000000  .00001234  00000+0  12000-4 0  9999",
+      "tle2": "2 41881  35.0120 200.3312 0015600 100.2210 260.1120 15.23450000280006",
+      "epoch": "2024-01-01T12:00:00Z",
+      "status": "normal",
+      "stylePreset": "sat-lean",
+      "features": {
+        "noradId": "41881"
+      }
+    },
+    {
+      "id": "SAT-STARLINK",
+      "name": "星链-1071",
+      "country": "US",
+      "type": "satellite",
+      "longitude": null,
+      "latitude": null,
+      "height": null,
+      "tle1": "1 44713U 19074A   24001.60000000  .00023410  00000+0  22000-4 0  9990",
+      "tle2": "2 44713  53.0542  88.3321 0001234  90.1120 270.0090 15.06400000 90001",
+      "epoch": "2024-01-01T12:00:00Z",
+      "status": "offline",
+      "stylePreset": "sat-offline",
+      "features": {
+        "noradId": "44713"
+      }
+    },
+    {
+      "id": "RAD-BJ",
+      "name": "华北预警雷达站",
+      "country": "CN",
+      "type": "radar",
+      "longitude": 116.4,
+      "latitude": 39.9,
+      "height": 50,
+      "status": "normal",
+      "stylePreset": "radar-friendly",
+      "features": {
+        "band": "S",
+        "coverageRadiusM": 450000,
+        "model": "YLC-8"
+      }
+    },
+    {
+      "id": "RAD-SH",
+      "name": "华东相控阵雷达",
+      "country": "CN",
+      "type": "radar",
+      "longitude": 121.47,
+      "latitude": 31.23,
+      "height": 30,
+      "status": "normal",
+      "stylePreset": "radar-friendly",
+      "features": {
+        "band": "X",
+        "coverageRadiusM": 380000,
+        "threatLevel": 2
+      }
+    },
+    {
+      "id": "RAD-GUAM",
+      "name": "关岛监视雷达",
+      "country": "US",
+      "type": "radar",
+      "longitude": 144.75,
+      "latitude": 13.45,
+      "height": 120,
+      "status": "alert",
+      "stylePreset": "radar-hostile",
+      "features": {
+        "band": "S",
+        "coverageRadiusM": 500000,
+        "threatLevel": 4
+      }
+    },
+    {
+      "id": "RAD-OKI",
+      "name": "冲绳雷达站",
+      "country": "JP",
+      "type": "radar",
+      "longitude": 127.68,
+      "latitude": 26.21,
+      "height": 80,
+      "status": "normal",
+      "stylePreset": "radar-neutral",
+      "features": {
+        "band": "L",
+        "coverageRadiusM": 300000
+      }
+    },
+    {
+      "id": "RCK-CZ5",
+      "name": "长征五号遥八",
+      "country": "CN",
+      "type": "rocket",
+      "longitude": 110.95,
+      "latitude": 19.61,
+      "height": 10,
+      "status": "normal",
+      "stylePreset": "rocket-friendly",
+      "features": {
+        "czmlUrl": "/data/czml/cz5-launch.czml",
+        "launchTime": "2026-11-20T10:00:00Z",
+        "phase": "fairing"
+      }
+    },
+    {
+      "id": "RCK-F9",
+      "name": "猎鹰九号",
+      "country": "US",
+      "type": "rocket",
+      "longitude": -80.5774,
+      "latitude": 28.495,
+      "height": 5,
+      "status": "alert",
+      "stylePreset": "rocket-hostile",
+      "features": {
+        "czmlUrl": "/data/czml/f9-launch.czml",
+        "launchTime": "2026-11-20T12:30:00Z",
+        "phase": "stage_sep"
+      }
+    },
+    {
+      "id": "AIR-001",
+      "name": "空中目标-01",
+      "country": "RU",
+      "type": "aircraft",
+      "longitude": 112.3,
+      "latitude": 40.1,
+      "height": 8500,
+      "status": "alert",
+      "stylePreset": "air-hostile",
+      "features": {
+        "speed": 920,
+        "heading": 135,
+        "threatLevel": 4
+      }
+    },
+    {
+      "id": "SHIP-001",
+      "name": "海上目标-01",
+      "country": "US",
+      "type": "ship",
+      "longitude": 123.5,
+      "latitude": 26.8,
+      "height": 0,
+      "status": "normal",
+      "stylePreset": "ship-hostile",
+      "features": {
+        "speed": 32,
+        "heading": 70
+      }
+    },
+    {
+      "id": "STN-001",
+      "name": "地面测控站",
+      "country": "CN",
+      "type": "station",
+      "longitude": 101.2,
+      "latitude": 25.6,
+      "height": 1600,
+      "status": "normal",
+      "stylePreset": "station-friendly"
+    }
+  ]
+}
