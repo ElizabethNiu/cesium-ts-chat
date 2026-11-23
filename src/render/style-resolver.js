@@ -1,5 +1,9 @@
-// StyleResolver：StyleSpec → Cesium 渲染参数
-// 统一使用原生 Cesium 材质 API（ColorMaterial / GridMaterial / 虚线材质）
+/**
+ * StyleResolver：StyleSpec → Cesium 渲染参数
+ * 统一使用原生 Cesium 材质 API（ColorMaterial / GridMaterial / 虚线材质）。
+ * @author ElizabethNiu / elizaniu18@gmail.com
+ * @since 2026-11-23 16:46:35
+ */
 import {
   Color,
   ColorMaterialProperty,

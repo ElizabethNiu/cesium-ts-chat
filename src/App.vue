@@ -1,72 +1,100 @@
 <script setup>
+/**
+ * 根组件：二三维地球态势标绘 Demo
+ * 组合 Cesium 地图容器 + 自然语言对话面板，串联数据加载与命令执行链路。
+ * @author ElizabethNiu / elizaniu18@gmail.com
+ * @since 2026-11-23 16:46:35
+ */
 import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { storeToRefs } from 'pinia'
 import { PlotRenderer } from './render/PlotRenderer'
 import { createProvider } from './contract/provider'
 import { PRESET_ACTIONS, parseCommand } from './commands/parser'
+import { usePlotStore } from './store/plot'
 
+// 地图容器 DOM 引用
 const containerRef = ref(null)
+// 输入框文本
 const inputText = ref('')
-const messages = ref([])
-const loading = ref(false)
+// 渲染管理器实例（非响应式，避免 Vue 深度代理 Cesium Viewer）
 const renderer = ref(null)
-const deviceCount = ref(0)
 
-function addMessage(role, text, list = null) {
-  messages.value.push({ role, text, list, time: new Date().toLocaleTimeString() })
+const store = usePlotStore()
+const { messages, loading, deviceCount } = storeToRefs(store)
+
+/**
+ * 执行命令并回填结果消息
+ * @param {object} command 命令 IR 对象
+ */
+const runCommand = (command) => {
+  const res = renderer.value.execute(command)
+  if (res.ok) {
+    store.addMessage('assistant', res.message, res.list)
+  } else {
+    store.addMessage('assistant', `⚠️ ${res.error}`)
+  }
+}
+
+/**
+ * 提交用户输入的自然语言指令
+ * 解析失败时提示，成功则执行对应命令
+ */
+const submit = () => {
+  const text = inputText.value.trim()
+  if (!text) return
+  store.addMessage('user', text)
+  inputText.value = ''
+  store.setLoading(true)
+
+  // 模拟轻量延迟，一期规则解析；后台 Agent 就绪后替换为 Ollama 调用
+  setTimeout(() => {
+    const r = parseCommand(text)
+    if (r.ok) {
+      runCommand(r.command)
+    } else {
+      store.addMessage('assistant', `⚠️ ${r.error}`)
+    }
+    store.setLoading(false)
+  }, 200)
+}
+
+/**
+ * 触发预置命令按钮
+ * @param {object} action 预置动作对象（含 label/text/build）
+ */
+const runPreset = (action) => {
+  store.addMessage('user', action.text)
+  runCommand(action.build())
 }
 
 onMounted(async () => {
   renderer.value = new PlotRenderer(containerRef.value)
   renderer.value.init()
 
-  // 加载设备
+  // 加载设备并渲染
   try {
     const provider = createProvider()
     const targets = await provider.load()
-    deviceCount.value = targets.filter((t) => t.category !== 'group').length
+    store.setTargets(targets)
     await renderer.value.loadTargets(targets)
-    addMessage('assistant', `已加载 ${deviceCount.value} 个目标设备（数据源：${provider.name}）。`)
-    addMessage(
+    store.addMessage(
+      'assistant',
+      `已加载 ${deviceCount.value} 个目标设备（数据源：${provider.name}）。`
+    )
+    store.addMessage(
       'assistant',
       '可以点下方快捷命令，或输入自然语言指令，例如「在南海海域画一个红色警戒区」。'
     )
   } catch (e) {
-    addMessage('assistant', `加载数据失败：${e.message}`)
+    store.addMessage('assistant', `加载数据失败：${e.message}`)
   }
 })
 
-function runCommand(command) {
-  const res = renderer.value.execute(command)
-  if (res.ok) {
-    addMessage('assistant', res.message, res.list)
-  } else {
-    addMessage('assistant', `⚠️ ${res.error}`)
-  }
-}
-
-function submit() {
-  const text = inputText.value.trim()
-  if (!text) return
-  addMessage('user', text)
-  inputText.value = ''
-  loading.value = true
-
-  // 模拟轻量延迟，一期规则解析
-  setTimeout(() => {
-    const r = parseCommand(text)
-    if (r.ok) {
-      runCommand(r.command)
-    } else {
-      addMessage('assistant', `⚠️ ${r.error}`)
-    }
-    loading.value = false
-  }, 200)
-}
-
-function runPreset(action) {
-  addMessage('user', action.text)
-  runCommand(action.build())
-}
+// 组件销毁时释放 Cesium Viewer，避免内存泄漏
+onBeforeUnmount(() => {
+  renderer.value?.destroy()
+  renderer.value = null
+})
 </script>
 
 <template>
@@ -79,7 +107,7 @@ function runPreset(action) {
       <div class="brand">
         <span class="logo">◎</span>
         <span>二三维地球态势标绘 · 最小 Demo</span>
-        <span class="badge">Vue3 + Vite + JS + Cesium</span>
+        <span class="badge">Vue3 + Vite + JS + Cesium + Element Plus</span>
       </div>
       <div class="stats">
         <span class="stat">目标 <b>{{ deviceCount }}</b></span>
@@ -109,24 +137,26 @@ function runPreset(action) {
 
       <!-- 预置命令 -->
       <div class="presets">
-        <button
+        <el-button
           v-for="a in PRESET_ACTIONS"
           :key="a.label"
+          size="small"
+          round
           class="preset-btn"
           @click="runPreset(a)"
         >
           {{ a.label }}
-        </button>
+        </el-button>
       </div>
 
       <!-- 输入框 -->
       <div class="input-row">
-        <input
+        <el-input
           v-model="inputText"
           placeholder="输入指令，如：画一条从北京到上海的航线"
           @keyup.enter="submit"
         />
-        <button class="send-btn" @click="submit">发送</button>
+        <el-button type="primary" class="send-btn" @click="submit">发送</el-button>
       </div>
     </aside>
   </div>
@@ -293,20 +323,17 @@ function runPreset(action) {
   border-top: 1px solid var(--border);
 }
 
+/* Element Plus 按钮样式微调，保持深色科技风 */
 .preset-btn {
-  font-size: 12px;
-  padding: 5px 10px;
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  background: transparent;
   color: var(--accent);
-  cursor: pointer;
-  transition: all 0.15s;
+  border-color: var(--border);
+  background: transparent;
 }
 
 .preset-btn:hover {
-  background: rgba(0, 208, 255, 0.12);
+  color: var(--accent);
   border-color: var(--accent);
+  background: rgba(0, 208, 255, 0.12);
 }
 
 .input-row {
@@ -316,33 +343,11 @@ function runPreset(action) {
   border-top: 1px solid var(--border);
 }
 
-.input-row input {
+.input-row .el-input {
   flex: 1;
-  padding: 9px 12px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--text);
-  font-size: 13px;
-  outline: none;
-}
-
-.input-row input:focus {
-  border-color: var(--accent);
 }
 
 .send-btn {
-  padding: 9px 16px;
-  border: none;
-  border-radius: 8px;
-  background: var(--accent);
-  color: #04202c;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.send-btn:hover {
-  opacity: 0.9;
+  flex-shrink: 0;
 }
 </style>

@@ -1,4 +1,9 @@
-// 卫星轨道计算：satellite.js SGP4 传播
+/**
+ * 卫星轨道计算：satellite.js SGP4 传播
+ * 内网私有化场景下用本地 satellite.js 计算轨道，无公网依赖。
+ * @author ElizabethNiu / elizaniu18@gmail.com
+ * @since 2026-11-23 16:46:35
+ */
 import * as satellite from 'satellite.js'
 
 /**

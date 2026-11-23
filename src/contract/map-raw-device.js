@@ -1,5 +1,10 @@
-// 字段映射层：RawDevice → TargetData
-// 后台字段/枚举/list-tree 形态最终确定后，只改本文件 + MappingConfig，其余层零改动
+/**
+ * 字段映射层：RawDevice → TargetData
+ * 后台字段/枚举/list-tree 形态最终确定后，只改本文件 + MappingConfig，其余层零改动。
+ * 这是抗变化的核心：后台字段变更只需同步本文件的映射逻辑，业务层零改动。
+ * @author ElizabethNiu / elizaniu18@gmail.com
+ * @since 2026-11-23 16:46:35
+ */
 
 /** 默认映射配置（候选版，字段锁定后同步即可） */
 export const defaultMappingConfig = {

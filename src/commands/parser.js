@@ -1,5 +1,9 @@
-// 命令解析器：自然语言/规范化语言 → 命令 IR
-// 一期用规则解析跑通命令链，后台 Agent 就绪后替换为 Ollama 调用
+/**
+ * 命令解析器：自然语言/规范化语言 → 命令 IR
+ * 一期用规则解析跑通命令链，后台 Agent 就绪后替换为 Ollama 调用。
+ * @author ElizabethNiu / elizaniu18@gmail.com
+ * @since 2026-11-23 16:46:35
+ */
 import { validateCommand } from './ir'
 
 /** 内置预置命令（一期通过 UI 触发，不依赖后台 Agent） */

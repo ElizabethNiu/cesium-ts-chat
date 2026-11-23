@@ -1,7 +1,12 @@
-// Cesium 渲染管理器：Viewer 初始化 + 设备渲染 + 命令执行（dispatcher）
+/**
+ * Cesium 渲染管理器：Viewer 初始化 + 设备渲染 + 命令执行（dispatcher）
+ * 与数据契约、样式系统、命令 IR 解耦，只负责把 TargetData / PlotCommand 翻译成 Cesium 实体。
+ * @author ElizabethNiu / elizaniu18@gmail.com
+ * @since 2026-11-23 16:46:35
+ */
 import * as Cesium from 'cesium'
-import { resolveStyle, CAMP_PRESET } from '../core/styleSpec'
-import { toColor, lineMaterial, outlineMaterial, iconDataUri } from './styleResolver'
+import { resolveStyle, CAMP_PRESET } from '../core/style-spec'
+import { toColor, lineMaterial, outlineMaterial, iconDataUri } from './style-resolver'
 import { computeOrbit, currentPosition } from './orbit'
 
 export class PlotRenderer {

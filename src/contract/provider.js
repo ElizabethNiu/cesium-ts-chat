@@ -1,6 +1,11 @@
-// Provider 接口与 Mock 实现
-// MockProvider = 前端一期正式数据源（读本地 JSON）；ApiProvider 为二期开关（VITE_DATA_SOURCE=api）
-import { normalizeDevices, defaultMappingConfig } from './mapRawDevice'
+/**
+ * 数据源 Provider 接口与实现
+ * MockProvider = 前端一期正式数据源（读本地 JSON）；ApiProvider 为二期开关（VITE_DATA_SOURCE=api）。
+ * 双 Provider 共用同一映射函数，业务代码通过 createProvider() 工厂切换，零改动。
+ * @author ElizabethNiu / elizaniu18@gmail.com
+ * @since 2026-11-23 16:46:35
+ */
+import { normalizeDevices, defaultMappingConfig } from './map-raw-device'
 
 /** 本地 JSON 数据源（一期唯一形态） */
 export class MockProvider {

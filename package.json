@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "cesium": "^1.140.0",
+    "element-plus": "^2.14.8",
+    "pinia": "^4.1.0",
     "satellite.js": "^5.0.0",
     "vue": "^3.5.13"
   },

@@ -1,5 +1,10 @@
-// 命令 IR（Intermediate Representation）
-// LLM 不直接生成 Cesium API 代码，而是输出结构化命令；样式走预设引用 + 白名单覆盖，防幻觉
+/**
+ * 命令 IR（Intermediate Representation）
+ * LLM 不直接生成 Cesium API 代码，而是输出结构化命令；样式走预设引用 + 白名单覆盖，防幻觉。
+ * 本文件负责命令结构校验，拦截非法字段，是防幻觉的第一道防线。
+ * @author ElizabethNiu / elizaniu18@gmail.com
+ * @since 2026-11-23 16:46:35
+ */
 
 /** 校验命令结构（轻量白名单校验，拦截非法字段） */
 export function validateCommand(cmd) {

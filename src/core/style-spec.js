@@ -1,5 +1,10 @@
-// StyleSpec 与预设库
-// 自然语言 → StyleSpec → StyleResolver 翻译 → Cesium 渲染
+/**
+ * StyleSpec 与预设库
+ * 自然语言 → StyleSpec → StyleResolver 翻译 → Cesium 渲染。
+ * 预设 = 语义化命名 + 完整样式规格，LLM 只引用预设 ID + 白名单覆盖，避免编造 GLSL/材质。
+ * @author ElizabethNiu / elizaniu18@gmail.com
+ * @since 2026-11-23 16:46:35
+ */
 
 /** 预设库：预设 = 语义化命名 + 完整 StyleSpec */
 export const PRESETS = {
