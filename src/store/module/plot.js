@@ -1,8 +1,8 @@
 /**
- * 全局状态管理（Pinia store）
- * 按规范禁止使用全局变量，统一通过 Pinia 管理设备列表与对话消息。
+ * 业务状态模块：态势标绘（plot）
+ * 管理设备列表与自然语言对话消息。
  * @author ElizabethNiu / elizaniu18@gmail.com
- * @since 2026-11-23 16:46:35
+ * @since 2026-11-23 17:10:00
  */
 import { defineStore } from 'pinia'
 

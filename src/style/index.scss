@@ -1,3 +1,12 @@
+/**
+ * 全局通用样式
+ * 统一管理 CSS 变量、reset 与全局基础样式。
+ * 组件私有样式不在此处，仍内联在各 .vue 文件的 <style lang="scss" scoped> 中。
+ * @author ElizabethNiu / elizaniu18@gmail.com
+ * @since 2026-11-23 17:00:00
+ */
+
+// 主题变量（深色科技风）
 :root {
   --bg: #0b1a2a;
   --panel-bg: rgba(15, 30, 46, 0.92);
@@ -9,6 +18,7 @@
   --warn: #ff9500;
 }
 
+// 全局 reset
 * {
   box-sizing: border-box;
   margin: 0;
