@@ -11,8 +11,12 @@ import 'element-plus/dist/index.css'
 import App from './App.vue'
 import './style/index.scss'
 import { pinia, useCommonStore, usePlotStore } from './store'
+import { registerComponents } from './components/register'
 
 const app = createApp(App)
+
+// 注册公共组件为全局组件（BasePanel 等）
+registerComponents(app)
 
 // 注册 Pinia 状态管理
 app.use(pinia)

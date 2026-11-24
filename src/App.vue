@@ -1,111 +1,3 @@
-<script>
-/**
- * 根组件：二三维地球态势标绘 Demo
- * 组合 Cesium 地图容器 + 自然语言对话面板，串联数据加载与命令执行链路。
- * 采用 Vue 全生命周期（Options API）写法，样式内联于 <style lang="scss" scoped>。
- * @author ElizabethNiu / elizaniu18@gmail.com
- * @since 2026-11-23 17:00:00
- */
-import { markRaw } from 'vue'
-import { PlotRenderer } from './render/plot-renderer'
-import { createProvider } from './contract/provider'
-import { PRESET_ACTIONS, parseCommand } from './commands/parser'
-
-export default {
-  name: 'App',
-
-  data() {
-    return {
-      // 预置命令动作列表（模板需访问，故暴露到 data）
-      presetActions: PRESET_ACTIONS,
-      // 输入框文本
-      inputText: '',
-      // 渲染管理器实例（markRaw 避免 Vue 深度代理 Cesium Viewer）
-      renderer: null
-    }
-  },
-
-  methods: {
-    /**
-     * 执行命令并回填结果消息
-     * @param {object} command 命令 IR 对象
-     * @returns {void}
-     */
-    runCommand(command) {
-      const res = this.renderer.execute(command)
-      if (res.ok) {
-        this.$store.plot.addMessage('assistant', res.message, res.list)
-      } else {
-        this.$store.plot.addMessage('assistant', `⚠️ ${res.error}`)
-      }
-    },
-
-    /**
-     * 提交用户输入的自然语言指令
-     * 解析失败时提示，成功则执行对应命令
-     * @returns {void}
-     */
-    submit() {
-      const text = this.inputText.trim()
-      if (!text) return
-      this.$store.plot.addMessage('user', text)
-      this.inputText = ''
-      this.$store.plot.setLoading(true)
-
-      // 模拟轻量延迟，一期规则解析；后台 Agent 就绪后替换为 Ollama 调用
-      setTimeout(() => {
-        const r = parseCommand(text)
-        if (r.ok) {
-          this.runCommand(r.command)
-        } else {
-          this.$store.plot.addMessage('assistant', `⚠️ ${r.error}`)
-        }
-        this.$store.plot.setLoading(false)
-      }, 200)
-    },
-
-    /**
-     * 触发预置命令按钮
-     * @param {object} action 预置动作对象（含 label/text/build）
-     * @returns {void}
-     */
-    runPreset(action) {
-      this.$store.plot.addMessage('user', action.text)
-      this.runCommand(action.build())
-    }
-  },
-
-  async mounted() {
-    this.renderer = markRaw(new PlotRenderer(this.$refs.containerRef))
-    this.renderer.init()
-
-    // 加载设备并渲染
-    try {
-      const provider = createProvider()
-      const targets = await provider.load()
-      this.$store.plot.setTargets(targets)
-      await this.renderer.loadTargets(targets)
-      this.$store.plot.addMessage(
-        'assistant',
-        `已加载 ${this.$store.plot.deviceCount} 个目标设备（数据源：${provider.name}）。`
-      )
-      this.$store.plot.addMessage(
-        'assistant',
-        '可以点下方快捷命令，或输入自然语言指令，例如「在南海海域画一个红色警戒区」。'
-      )
-    } catch (e) {
-      this.$store.plot.addMessage('assistant', `加载数据失败：${e.message}`)
-    }
-  },
-
-  // 组件销毁时释放 Cesium Viewer，避免内存泄漏
-  beforeUnmount() {
-    this.renderer?.destroy()
-    this.renderer = null
-  }
-}
-</script>
-
 <template>
   <div class="app">
     <!-- 地图容器 -->
@@ -123,10 +15,20 @@ export default {
       </div>
     </header>
 
-    <!-- 对话面板 -->
-    <aside class="app-chat-panel">
-      <div class="app-chat-header">自然语言标绘</div>
-
+    <!-- 对话面板（BasePanel 容器） -->
+    <base-panel
+      v-if="chatVisible"
+      class="app-chat-panel"
+      title="自然语言标绘"
+      :x="null"
+      :y="null"
+      :width="360"
+      :height="520"
+      :min-width="280"
+      :min-height="320"
+      @close="closeChat"
+    >
+      <!-- 消息列表 -->
       <div class="app-messages">
         <div
           v-for="m in $store.plot.messages"
@@ -167,9 +69,185 @@ export default {
         />
         <el-button type="primary" class="app-send-btn" @click="submit">发送</el-button>
       </div>
-    </aside>
+    </base-panel>
+
+    <!-- 目标详情弹窗（BasePanel 容器 + TargetDetail 内容） -->
+    <base-panel
+      v-if="detailVisible && detailTarget"
+      class="app-detail-panel"
+      :title="detailTarget.name"
+      :x="null"
+      :y="null"
+      :width="360"
+      :height="420"
+      :min-width="300"
+      :min-height="280"
+      @close="closeDetail"
+    >
+      <target-detail :target="detailTarget" />
+    </base-panel>
   </div>
 </template>
+
+<script>
+/**
+ * 根组件：二三维地球态势标绘 Demo
+ * 组合 Cesium 地图容器 + 自然语言对话面板，串联数据加载与命令执行链路。
+ * 对话面板与目标详情弹窗均以全局组件 BasePanel 作为容器。
+ * 采用 Vue 全生命周期（Options API）写法，样式内联于 <style lang="scss" scoped>。
+ * @author ElizabethNiu / elizaniu18@gmail.com
+ * @since 2026-11-24 16:30:00
+ */
+import { markRaw } from 'vue'
+import { PlotRenderer } from './render/plot-renderer'
+import { createProvider } from './contract/provider'
+import { PRESET_ACTIONS, parseCommand } from './commands/parser'
+
+export default {
+  name: 'App',
+
+  data() {
+    return {
+      // 预置命令动作列表（模板需访问，故暴露到 data）
+      presetActions: PRESET_ACTIONS,
+      // 输入框文本
+      inputText: '',
+      // 渲染管理器实例（markRaw 避免 Vue 深度代理 Cesium Viewer）
+      renderer: null,
+      // 对话面板是否显示
+      chatVisible: true,
+      // 目标详情弹窗状态
+      detailVisible: false,
+      detailTarget: null
+    }
+  },
+
+  methods: {
+    /**
+     * 执行命令并回填结果消息
+     * 聚焦命令成功后，同步弹出该目标的详情面板
+     * @param {object} command 命令 IR 对象
+     * @returns {void}
+     */
+    runCommand(command) {
+      const res = this.renderer.execute(command)
+      if (res.ok) {
+        this.$store.plot.addMessage('assistant', res.message, res.list)
+        // 聚焦目标成功后，自动弹出目标详情
+        if (command.op === 'focus') {
+          this.showTargetDetail(command.targetId)
+        }
+      } else {
+        this.$store.plot.addMessage('assistant', `⚠️ ${res.error}`)
+      }
+    },
+
+    /**
+     * 根据目标 ID 弹出目标详情面板
+     * @param {string} targetId 目标 ID
+     * @returns {void}
+     */
+    showTargetDetail(targetId) {
+      const target = this.$store.plot.targets.find((t) => t.id === targetId)
+      if (!target) return
+      this.detailTarget = target
+      this.detailVisible = true
+    },
+
+    /**
+     * 提交用户输入的自然语言指令
+     * 解析失败时提示，成功则执行对应命令
+     * @returns {void}
+     */
+    submit() {
+      const text = this.inputText.trim()
+      if (!text) return
+      this.$store.plot.addMessage('user', text)
+      this.inputText = ''
+      this.$store.plot.setLoading(true)
+
+      // 模拟轻量延迟，一期规则解析；后台 Agent 就绪后替换为 Ollama 调用
+      setTimeout(() => {
+        const r = parseCommand(text)
+        if (r.ok) {
+          this.runCommand(r.command)
+        } else {
+          this.$store.plot.addMessage('assistant', `⚠️ ${r.error}`)
+        }
+        this.$store.plot.setLoading(false)
+      }, 200)
+    },
+
+    /**
+     * 触发预置命令按钮
+     * @param {object} action 预置动作对象（含 label/text/build）
+     * @returns {void}
+     */
+    runPreset(action) {
+      this.$store.plot.addMessage('user', action.text)
+      this.runCommand(action.build())
+    },
+
+    /**
+     * 关闭对话面板
+     * @returns {void}
+     */
+    closeChat() {
+      this.chatVisible = false
+    },
+
+    /**
+     * 处理态势图实体点选，弹出目标详情
+     * @param {object} picked 点选结果（{ type, id }）
+     * @returns {void}
+     */
+    handlePickEntity(picked) {
+      if (!picked || picked.type !== 'device') return
+      this.showTargetDetail(picked.id)
+    },
+
+    /**
+     * 关闭目标详情弹窗
+     * @returns {void}
+     */
+    closeDetail() {
+      this.detailVisible = false
+      this.detailTarget = null
+    }
+  },
+
+  async mounted() {
+    this.renderer = markRaw(new PlotRenderer(this.$refs.containerRef))
+    this.renderer.init()
+    // 注册实体点选回调，态势图上点目标弹出详情
+    this.renderer.setPickCallback(this.handlePickEntity)
+
+    // 加载设备并渲染
+    try {
+      const provider = createProvider()
+      const targets = await provider.load()
+      this.$store.plot.setTargets(targets)
+      await this.renderer.loadTargets(targets)
+      this.$store.plot.addMessage(
+        'assistant',
+        `已加载 ${this.$store.plot.deviceCount} 个目标设备（数据源：${provider.name}）。`
+      )
+      this.$store.plot.addMessage(
+        'assistant',
+        '可以点下方快捷命令，或输入自然语言指令，例如「在南海海域画一个红色警戒区」。'
+      )
+    } catch (e) {
+      this.$store.plot.addMessage('assistant', `加载数据失败：${e.message}`)
+    }
+  },
+
+  // 组件销毁时释放 Cesium Viewer
+  beforeUnmount() {
+    this.renderer?.destroy()
+    this.renderer = null
+  }
+}
+</script>
 
 <style lang="scss" scoped>
 .app {
@@ -235,28 +313,16 @@ export default {
   color: var(--accent);
 }
 
+/* 对话面板定位：右上角 */
 .app-chat-panel {
-  position: absolute;
   right: 16px;
   top: 64px;
-  bottom: 16px;
-  width: 360px;
-  display: flex;
-  flex-direction: column;
-  background: var(--panel-bg);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  backdrop-filter: blur(12px);
-  overflow: hidden;
-  z-index: 10;
 }
 
-.app-chat-header {
-  padding: 12px 16px;
-  font-size: 14px;
-  font-weight: 600;
-  border-bottom: 1px solid var(--border);
-  color: var(--text);
+/* 目标详情弹窗定位：居中偏右 */
+.app-detail-panel {
+  right: 200px;
+  top: 120px;
 }
 
 .app-messages {
@@ -363,5 +429,35 @@ export default {
 
 .app-send-btn {
   flex-shrink: 0;
+}
+
+/* Cesium 内置控件深色主题适配：时间轴、动画、导航按钮 */
+:deep(.cesium-viewer-bottom) {
+  left: 0;
+  right: 16px;
+}
+
+:deep(.cesium-viewer-timelineContainer) {
+  background: var(--panel-bg);
+  border-top: 1px solid var(--border);
+}
+
+:deep(.cesium-timeline-main) {
+  background: transparent;
+}
+
+:deep(.cesium-viewer-animationContainer) {
+  background: var(--panel-bg);
+  border-right: 1px solid var(--border);
+  border-top: 1px solid var(--border);
+}
+
+:deep(.cesium-viewer-toolbar),
+:deep(.cesium-viewer-fullscreenContainer),
+:deep(.cesium-viewer-homeButtonContainer),
+:deep(.cesium-sceneModePicker-wrapper) {
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
 }
 </style>

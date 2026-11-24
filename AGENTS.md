@@ -14,14 +14,15 @@
 
 1. **技术栈**：Vue 3 + Vite + JavaScript + Element Plus + Pinia + SCSS。
 2. **禁止 `<script setup>`**，统一使用 Options API 全生命周期写法（`export default { data/computed/methods/mounted/beforeUnmount }`）。
-3. **组件样式内联**在 `<style lang="scss" scoped>` 中，即使超长也不抽出为独立文件。
-4. **全局通用样式**统一写到 `src/style/index.scss`，并在 `main.js` 引用。
-5. **禁止无意义的函数/文件拆分**，拆分必须基于真实的可读性、复用或职责边界。
-6. **状态管理用 Pinia**：通用 store 写在 `src/store/index.js`，业务模块写在 `src/store/module/`，通过 `this.$store` 访问。
-7. **命名**：组件 PascalCase，其他文件 kebab-case/小驼峰；常量全大写；CSS 类名 kebab-case。
-8. **注释**：函数/组件/关键逻辑必须带中文注释，含 `@author`、`@since` 及参数/返回值说明。
-9. **模板规范**：`v-for` 必须绑唯一 `key`（禁用索引）；模板内禁复杂表达式；禁止 `v-if` 与 `v-for` 同标签。
-10. **Props**：必须完整定义类型、默认值与校验。
+3. **组件内部结构顺序**：`<template>` 置顶 → `<script>` 居中 → `<style>` 置底，禁止颠倒。
+4. **组件样式内联**在 `<style lang="scss" scoped>` 中，即使超长也不抽出为独立文件。
+5. **全局通用样式**统一写到 `src/style/index.scss`，并在 `main.js` 引用。
+6. **禁止无意义的函数/文件拆分**，拆分必须基于真实的可读性、复用或职责边界。
+7. **状态管理用 Pinia**：通用 store 写在 `src/store/index.js`，业务模块写在 `src/store/module/`，通过 `this.$store` 访问。
+8. **命名**：组件 PascalCase，其他文件 kebab-case/小驼峰；常量全大写；CSS 类名 kebab-case。
+9. **注释**：函数/组件/关键逻辑必须带中文注释，含 `@author`、`@since` 及参数/返回值说明。
+10. **模板规范**：`v-for` 必须绑唯一 `key`（禁用索引）；模板内禁复杂表达式；禁止 `v-if` 与 `v-for` 同标签。
+11. **Props**：必须完整定义类型、默认值与校验。
 
 ## 项目上下文（速览）
 

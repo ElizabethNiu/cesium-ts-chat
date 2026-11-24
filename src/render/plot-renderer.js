@@ -17,23 +17,27 @@ export class PlotRenderer {
     this.deviceEntities = new Map() // targetId -> { entity, ... }
     this.plotEntities = new Map() // 标绘 id -> entity[]
     this.targets = []
+    // 实体点击回调（由外部注册，用于态势图上点选目标弹详情）
+    this.onPickEntity = null
+    this._pickHandler = null
   }
 
   /**
    * 初始化 Cesium Viewer
    * baseLayer=false 彻底禁用 Ion 默认影像，内网零公网依赖
+   * 启用时间轴(timeline)、动画(animation)、恢复默认视角(homeButton)、导航帮助等常用控件
    */
   init() {
     Cesium.Ion.defaultAccessToken = ''
     const viewer = new Cesium.Viewer(this.container, {
       baseLayer: false,
-      animation: false,
-      timeline: false,
+      animation: true,
+      timeline: true,
       baseLayerPicker: false,
       geocoder: false,
-      homeButton: false,
+      homeButton: true,
       sceneModePicker: true,
-      navigationHelpButton: false,
+      navigationHelpButton: true,
       fullscreenButton: true,
       infoBox: false,
       selectionIndicator: false
@@ -43,7 +47,7 @@ export class PlotRenderer {
     viewer.scene.skyAtmosphere.show = true
     viewer.cesiumWidget.creditContainer.style.display = 'none'
 
-    // 初始视角：面向东亚/西太平洋
+    // 初始视角：面向东亚/西太平洋（homeButton 会自动记录此视角供恢复）
     viewer.camera.setView({
       destination: Cesium.Cartesian3.fromDegrees(120, 25, 12000000),
       orientation: {
@@ -52,8 +56,38 @@ export class PlotRenderer {
         roll: 0
       }
     })
+
+    // 监听实体点击，用于态势图上点选目标弹详情
+    this._setupPickHandler(viewer)
+
     this.viewer = viewer
     return viewer
+  }
+
+  /**
+   * 注册实体点击监听
+   * 左键点选实体后，通过 onPickEntity 回调通知外部（携带 targetId 或 plotId）
+   * @param {object} viewer Cesium Viewer 实例
+   */
+  _setupPickHandler(viewer) {
+    this._pickHandler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas)
+    this._pickHandler.setInputAction((movement) => {
+      const picked = viewer.scene.pick(movement.position)
+      if (!Cesium.defined(picked) || !picked.id) return
+      const props = picked.id.properties
+      const targetId = props?.targetId?.getValue?.()
+      if (targetId && this.onPickEntity) {
+        this.onPickEntity({ type: 'device', id: targetId })
+      }
+    }, Cesium.ScreenSpaceEventType.LEFT_CLICK)
+  }
+
+  /**
+   * 注册实体点击回调
+   * @param {Function} cb 回调函数（接收 { type, id }）
+   */
+  setPickCallback(cb) {
+    this.onPickEntity = cb
   }
 
   /** 加载并渲染所有目标设备 */
@@ -414,6 +448,10 @@ export class PlotRenderer {
 
   /** 销毁 Viewer，释放资源 */
   destroy() {
+    if (this._pickHandler) {
+      this._pickHandler.destroy()
+      this._pickHandler = null
+    }
     if (this.viewer) {
       this.viewer.destroy()
       this.viewer = null
