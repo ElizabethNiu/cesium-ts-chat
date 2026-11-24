@@ -86,6 +86,18 @@ cesium-ts-demo/
 - **代码规范**：详见 [`docs/前端开发规范.md`](./docs/前端开发规范.md)。
 - **Git 提交**：详见 [`docs/GIT_COMMIT.md`](./docs/GIT_COMMIT.md)。
 
+## AI 编码工具规范入口
+
+项目已内置多工具共用的开发规范入口，使用对应 AI 编码工具时会被自动读取：
+
+| 文件 | 适用工具 |
+|------|----------|
+| [`AGENTS.md`](./AGENTS.md) | Codex、GitHub Copilot、Cursor 及通用 Agent |
+| [`CLAUDE.md`](./CLAUDE.md) | Claude Code |
+| [`.cursor/rules/frontend-standards.mdc`](./.cursor/rules/frontend-standards.mdc) | Cursor |
+
+以上入口均指向同一份权威规范 `docs/前端开发规范.md`，避免规范漂移。
+
 ## 数据源切换
 
 | 环境变量 | 说明 |
